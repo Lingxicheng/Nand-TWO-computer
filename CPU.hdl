@@ -1,0 +1,107 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/05/CPU.hdl
+
+/**
+ * The Hack CPU (Central Processing unit), consisting of an ALU,
+ * two registers named A and D, and a program counter named PC.
+ * The CPU is designed to fetch and execute instructions written in 
+ * the Hack machine language. In particular, functions as follows:
+ * Executes the inputted instruction according to the Hack machine 
+ * language specification. The D and A in the language specification
+ * refer to CPU-resident registers, while M refers to the external
+ * memory location addressed by A, i.e. to Memory[A]. The inM input 
+ * holds the value of this location. If the current instruction needs 
+ * to write a value to M, the value is placed in outM, the address 
+ * of the target location is placed in the addressM output, and the 
+ * writeM control bit is asserted. (When writeM==0, any value may 
+ * appear in outM). The outM and writeM outputs are combinational: 
+ * they are affected instantaneously by the execution of the current 
+ * instruction. The addressM and pc outputs are clocked: although they 
+ * are affected by the execution of the current instruction, they commit 
+ * to their new values only in the next time step. If reset==1 then the 
+ * CPU jumps to address 0 (i.e. pc is set to 0 in next time step) rather 
+ * than to the address resulting from executing the current instruction. 
+ */
+
+CHIP CPU {
+
+    IN  inM[16],         // M value input  (M = contents of RAM[A])
+        instruction[16], // Instruction for execution
+        reset;           // Signals whether to re-start the current
+                         // program (reset==1) or continue executing
+                         // the current program (reset==0).
+
+    OUT outM[16],        // M value output
+        writeM,          // Write to M? 
+        addressM[15],    // Address in data memory (of M)
+        pc[15];          // address of next instruction
+
+    PARTS:
+    // Put your code here:
+
+	//Judge the INSTRUCTION kind, put it to different place
+	DMux (in=instruction[0], sel=instruction[15], a=Ainstruction0, b=j3);
+	DMux (in=instruction[1], sel=instruction[15], a=Ainstruction1, b=j2);
+	DMux (in=instruction[2], sel=instruction[15], a=Ainstruction2, b=j1);
+	DMux (in=instruction[3], sel=instruction[15], a=Ainstruction3, b=d3, b=writeM);
+
+	DMux (in=instruction[4], sel=instruction[15], a=Ainstruction4, b=d2);
+	DMux (in=instruction[5], sel=instruction[15], a=Ainstruction5, b=d1);
+	DMux (in=instruction[6], sel=instruction[15], a=Ainstruction6, b=c6);
+	DMux (in=instruction[7], sel=instruction[15], a=Ainstruction7, b=c5);
+
+	DMux (in=instruction[8], sel=instruction[15], a=Ainstruction8, b=c4);
+	DMux (in=instruction[9], sel=instruction[15], a=Ainstruction9, b=c3);
+	DMux (in=instruction[10], sel=instruction[15], a=Ainstruction10, b=c2);
+	DMux (in=instruction[11], sel=instruction[15], a=Ainstruction11, b=c1);
+
+	DMux (in=instruction[12], sel=instruction[15], a=Ainstruction12, b=a);
+	DMux (in=instruction[13], sel=instruction[15], a=Ainstruction13);
+	DMux (in=instruction[14], sel=instruction[15], a=Ainstruction14);
+	DMux (in=instruction[15], sel=instruction[15], a=Ainstruction15);
+
+	//Operatiion for A register
+	Mux16 (a[0]=Ainstruction0, a[1]=Ainstruction1, a[2]=Ainstruction2, a[3]=Ainstruction3,
+		 a[4]=Ainstruction4, a[6]=Ainstruction6, a[7]=Ainstruction7, a[8]=Ainstruction8,
+		 a[9]=Ainstruction9, a[10]=Ainstruction10, a[11]=Ainstruction11, a[12]=Ainstruction12,
+		 a[14]=Ainstruction14, a[15]=Ainstruction15, a[5]=Ainstruction5, a[13]=Ainstruction13, 
+		 b=OutALUtoA, sel=instruction[15], out=MuxToA);
+
+	Not (in=instruction[15], out=Notinstruction15);
+	Or (a=Notinstruction15, b=d1, out=LoadA);
+
+	ARegister (in=MuxToA, load=LoadA, out=OutA, out[0..14]=addressM);
+
+
+	//Chose the enter of Y_ALU
+	Mux16 (a=OutA, b=inM, sel=a, out=InY);
+
+	ALU (x=InX, y=InY, zx=c1, nx=c2, zy=c3, ny=c4, f=c5, no=c6, zr=zr, ng=ng, out=OutALUtoA, out=OutALUtoD, out=outM);
+
+	//for Jump
+	Mux (a=j3, b=j1, sel=ng, out=MuxJumpa);
+	Mux (a=MuxJumpa, b=j2, sel=zr, out=j);
+	
+	Not (in=j, out=NotJ);
+	PC (inc=NotJ, load=j, reset=reset, in=OutA, out[0..14]=pc);
+
+	//forD
+	DRegister (in=OutALUtoD, load=d2, out=InX);
+	
+	
+	//220305
+	
+	
+	
+	
+	
+	
+	
+	
+
+	
+	
+} 
+
