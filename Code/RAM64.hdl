@@ -1,0 +1,63 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/03/a/RAM64.hdl
+
+/**
+ * Memory of 64 registers, each 16 bit-wide. Out holds the value
+ * stored at the memory location specified by address. If load==1, then 
+ * the in value is loaded into the memory location specified by address 
+ * (the loaded value will be emitted to out from the next time step onward).
+ */
+
+CHIP RAM64 {
+    IN in[16], load, address[6];
+    OUT out[16];
+
+    PARTS:
+    // Put your code here:
+	//选择进入的入口，用DMux8Way选择， 其他的位为0
+	DMux8Way (in=in[0], sel=address[3..5], a=a0, b=b0, d=d0, c=c0, e=e0, f=f0, g=g0, h=h0 );
+	DMux8Way (in=in[1], sel=address[3..5], a=a1, b=b1, d=d1, c=c1, e=e1, f=f1, g=g1, h=h1 );
+	DMux8Way (in=in[2], sel=address[3..5], a=a2, b=b2, d=d2, c=c2, e=e2, f=f2, g=g2, h=h2 );
+	DMux8Way (in=in[3], sel=address[3..5], a=a3, b=b3, d=d3, c=c3, e=e3, f=f3, g=g3, h=h3 );
+	DMux8Way (in=in[4], sel=address[3..5], a=a4, b=b4, d=d4, c=c4, e=e4, f=f4, g=g4, h=h4 );
+	DMux8Way (in=in[5], sel=address[3..5], a=a5, b=b5, d=d5, c=c5, e=e5, f=f5, g=g5, h=h5 );
+	DMux8Way (in=in[6], sel=address[3..5], a=a6, b=b6, d=d6, c=c6, e=e6, f=f6, g=g6, h=h6 );
+	DMux8Way (in=in[7], sel=address[3..5], a=a7, b=b7, d=d7, c=c7, e=e7, f=f7, g=g7, h=h7 );
+	DMux8Way (in=in[8], sel=address[3..5], a=a8, b=b8, d=d8, c=c8, e=e8, f=f8, g=g8, h=h8 );
+	DMux8Way (in=in[9], sel=address[3..5], a=a9, b=b9, d=d9, c=c9, e=e9, f=f9, g=g9, h=h9 );
+	DMux8Way (in=in[10], sel=address[3..5], a=a10, b=b10, d=d10, c=c10, e=e10, f=f10, g=g10, h=h10 );
+	DMux8Way (in=in[11], sel=address[3..5], a=a11, b=b11, d=d11, c=c11, e=e11, f=f11, g=g11, h=h11 );
+	DMux8Way (in=in[12], sel=address[3..5], a=a12, b=b12, d=d12, c=c12, e=e12, f=f12, g=g12, h=h12 );
+	DMux8Way (in=in[13], sel=address[3..5], a=a13, b=b13, d=d13, c=c13, e=e13, f=f13, g=g13, h=h13 );
+	DMux8Way (in=in[14], sel=address[3..5], a=a14, b=b14, d=d14, c=c14, e=e14, f=f14, g=g14, h=h14 );
+	DMux8Way (in=in[15], sel=address[3..5], a=a15, b=b15, d=d15, c=c15, e=e15, f=f15, g=g15, h=h15 );
+
+	//对指定的寄存器进行load操作，下面的//部分是写错的地方，我以为load为1存储，实际上是0存储
+	//Not (in=load, out=Notload);
+	DMux8Way (in=load, sel=address[3..5], a=load0, b=load1, c=load2, d=load3, e=load4, f=load5, g=load6, h=load7 );
+	//Not (in=Notload0, out=load0);
+	//Not (in=Notload1, out=load1);
+	//Not (in=Notload2, out=load2);
+	//Not (in=Notload3, out=load3);
+	//Not (in=Notload4, out=load4);
+	//Not (in=Notload5, out=load5);
+	//Not (in=Notload6, out=load6);
+	//Not (in=Notload7, out=load7);
+	
+	
+
+	//将load给寄存器，in给寄存器
+	RAM8 (in[0]=a0, in[1]=a1, in[2]=a2, in[3]=a3, in[4]=a4, in[5]=a5, in[6]=a6, in[7]=a7, in[8]=a8, in[9]=a9, in[10]=a10, in[11]=a11, in[12]=a12, in[13]=a13, in[14]=a14, in[15]=a15, load=load0, address=address[0..2], out=out0 );
+	RAM8 (in[0]=b0, in[1]=b1, in[2]=b2, in[3]=b3, in[4]=b4, in[5]=b5, in[6]=b6, in[7]=b7, in[8]=b8, in[9]=b9, in[10]=b10, in[11]=b11, in[12]=b12, in[13]=b13, in[14]=b14, in[15]=b15, load=load1, address=address[0..2], out=out1 );
+	RAM8 (in[0]=c0, in[1]=c1, in[2]=c2, in[3]=c3, in[4]=c4, in[5]=c5, in[6]=c6, in[7]=c7, in[8]=c8, in[9]=c9, in[10]=c10, in[11]=c11, in[12]=c12, in[13]=c13, in[14]=c14, in[15]=c15, load=load2, address=address[0..2], out=out2 );
+	RAM8 (in[0]=d0, in[1]=d1, in[2]=d2, in[3]=d3, in[4]=d4, in[5]=d5, in[6]=d6, in[7]=d7, in[8]=d8, in[9]=d9, in[10]=d10, in[11]=d11, in[12]=d12, in[13]=d13, in[14]=d14, in[15]=d15, load=load3, address=address[0..2], out=out3 );
+	RAM8 (in[0]=e0, in[1]=e1, in[2]=e2, in[3]=e3, in[4]=e4, in[5]=e5, in[6]=e6, in[7]=e7, in[8]=e8, in[9]=e9, in[10]=e10, in[11]=e11, in[12]=e12, in[13]=e13, in[14]=e14, in[15]=e15, load=load4, address=address[0..2], out=out4 );
+	RAM8 (in[0]=f0, in[1]=f1, in[2]=f2, in[3]=f3, in[4]=f4, in[5]=f5, in[6]=f6, in[7]=f7, in[8]=f8, in[9]=f9, in[10]=f10, in[11]=f11, in[12]=f12, in[13]=f13, in[14]=f14, in[15]=f15, load=load5, address=address[0..2], out=out5 );
+	RAM8 (in[0]=g0, in[1]=g1, in[2]=g2, in[3]=g3, in[4]=g4, in[5]=g5, in[6]=g6, in[7]=g7, in[8]=g8, in[9]=g9, in[10]=g10, in[11]=g11, in[12]=g12, in[13]=g13, in[14]=g14, in[15]=g15, load=load6, address=address[0..2], out=out6 );
+	RAM8 (in[0]=h0, in[1]=h1, in[2]=h2, in[3]=h3, in[4]=h4, in[5]=h5, in[6]=h6, in[7]=h7, in[8]=h8, in[9]=h9, in[10]=h10, in[11]=h11, in[12]=h12, in[13]=h13, in[14]=h14, in[15]=h15, load=load7, address=address[0..2], out=out7 );
+	
+	//从8个寄存器out中选择输出out.
+	Mux8Way16 (sel=address[3..5], a=out0, b=out1, c=out2, d=out3, e=out4, f=out5, g=out6, h=out7, out=out);
+}

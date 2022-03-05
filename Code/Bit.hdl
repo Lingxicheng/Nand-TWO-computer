@@ -1,0 +1,26 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/03/a/Bit.hdl
+
+/**
+ * 1-bit register:
+ * If load[t] == 1 then out[t+1] = in[t]
+ *                 else out does not change (out[t+1] = out[t])
+ */
+
+CHIP Bit {
+    IN in, load;
+    OUT out;
+
+    PARTS:
+    // Put your code here:
+
+	Mux (sel=load, b=in, a=t, out=out1);
+	DFF (in=out1, out=out, out=t);
+}
+//如果要写两个输出，就写成out=t, out=out,可以间接看成有两个引脚
+//(1的时候存储，我写反了)这是错的，-----------看清题目
+//If load[t] == 1 then out[t+1] = in[t]
+//                 else out does not change (out[t+1] = out[t])
+//load==1的时候读取，为零的时候存储；

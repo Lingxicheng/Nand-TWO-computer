@@ -1,0 +1,41 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/03/a/PC.hdl
+
+/**
+ * A 16-bit counter with load and reset control bits.
+ * if      (reset[t] == 1) out[t+1] = 0
+ * else if (load[t] == 1)  out[t+1] = in[t]
+ * else if (inc[t] == 1)   out[t+1] = out[t] + 1  (integer addition)
+ * else                    out[t+1] = out[t]
+ */
+
+CHIP PC {
+    IN in[16],load,inc,reset;
+    OUT out[16];
+
+    PARTS:
+    // Put your code here:
+	//take this part
+	//* else if (inc[t] == 1)   out[t+1] = out[t] + 1  (integer addition)
+ 	//* else                    out[t+1] = out[t]
+
+	Inc16 (in=outa, out=outinc );
+	Mux16 (sel=inc, a=outb, b=outinc, out=outincMux );
+
+	//take this part:* else if (load[t] == 1)  out[t+1] = in[t]
+
+	Mux16 (sel=load, a=outincMux, b=in, out=outloadMux );
+
+	//take this part: * if      (reset[t] == 1) out[t+1] = 0
+
+	Not (in=reset, out=NotReset );
+	And16 (a=outloadMux, b[0]=NotReset, b[1]=NotReset, b[2]=NotReset, b[3]=NotReset, b[4]=NotReset, b[5]=NotReset, b[6]=NotReset, b[7]=NotReset, b[8]=NotReset, b[9]=NotReset, b[10]=NotReset, b[11]=NotReset, b[12]=NotReset, b[13]=NotReset, b[14]=NotReset, b[15]=NotReset, out=outAnd );
+	Or (a=NotReset, b=reset, out=One );
+	Register (in=outAnd, load=One, out=out, out=outa, out=outb );
+	
+}
+	//when i take this code ,i have TWO problems:
+	//One: what's the compiler to manage the "if", what's the order of judge
+	//Two: why! the "IN" must in back, And "INC" must in first, why I can't change their order-------*@

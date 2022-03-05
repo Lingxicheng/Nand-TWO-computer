@@ -1,0 +1,117 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/05/Memory.hdl
+
+/**
+ * The complete address space of the Hack computer's memory,
+ * including RAM and memory-mapped I/O. 
+ * The chip facilitates read and write operations, as follows:
+ *     Read:  out(t) = Memory[address(t)](t)
+ *     Write: if load(t-1) then Memory[address(t-1)](t) = in(t-1)
+ * In words: the chip always outputs the value stored at the memory 
+ * location specified by address. If load==1, the in value is loaded 
+ * into the memory location specified by address. This value becomes 
+ * available through the out output from the next time step onward.
+ * Address space rules:
+ * Only the upper 16K+8K+1 words of the Memory chip are used. 
+ * Access to address>0x6000 is invalid. Access to any address in 
+ * the range 0x4000-0x5FFF results in accessing the screen memory 
+ * map. Access to address 0x6000 results in accessing the keyboard 
+ * memory map. The behavior in these addresses is described in the 
+ * Screen and Keyboard chip specifications given in the book.
+ */
+
+CHIP Memory {
+    IN in[16], load, address[15];
+    OUT out[16];
+                                                                                                                  
+    PARTS:
+    // Put your code here:
+	//first,chose THE load for RAM and Screen
+	//for load RAM
+	Not (in=address[14], out=notAddress14);
+	And (a=notAddress14, b=load, out=RamLoad);
+
+	//for load Screen
+	Not (in=address[13], out=notAddress13);
+	And (a=address[14], b=notAddress13, out=A14AndNotA13);
+	And (a=load, b=A14AndNotA13, out=ScreenLoad);
+
+	//chose the address for RAM and Screen
+	DMux (in=address[0], sel=address[14], a=RAMaddress0, b=DMuxOther0);
+	DMux (in=address[1], sel=address[14], a=RAMaddress1, b=DMuxOther1);
+	DMux (in=address[2], sel=address[14], a=RAMaddress2, b=DMuxOther2);
+	DMux (in=address[3], sel=address[14], a=RAMaddress3, b=DMuxOther3);
+	DMux (in=address[4], sel=address[14], a=RAMaddress4, b=DMuxOther4);
+
+	DMux (in=address[5], sel=address[14], a=RAMaddress5, b=DMuxOther5);
+	DMux (in=address[6], sel=address[14], a=RAMaddress6, b=DMuxOther6);
+	DMux (in=address[7], sel=address[14], a=RAMaddress7, b=DMuxOther7);
+	DMux (in=address[8], sel=address[14], a=RAMaddress8, b=DMuxOther8);
+	DMux (in=address[9], sel=address[14], a=RAMaddress9, b=DMuxOther9);
+
+	DMux (in=address[10], sel=address[14], a=RAMaddress10, b=DMuxOther10);
+	DMux (in=address[11], sel=address[14], a=RAMaddress11, b=DMuxOther11);
+	DMux (in=address[12], sel=address[14], a=RAMaddress12, b=DMuxOther12);
+	DMux (in=address[13], sel=address[14], a=RAMaddress13, b=DMuxOther13);
+
+
+	DMux (in=DMuxOther0, sel=DMuxOther13, a=ScreenAddress0);
+	DMux (in=DMuxOther1, sel=DMuxOther13, a=ScreenAddress1);
+	DMux (in=DMuxOther2, sel=DMuxOther13, a=ScreenAddress2);
+	DMux (in=DMuxOther3, sel=DMuxOther13, a=ScreenAddress3);
+	DMux (in=DMuxOther4, sel=DMuxOther13, a=ScreenAddress4);
+
+	DMux (in=DMuxOther5, sel=DMuxOther13, a=ScreenAddress5);
+	DMux (in=DMuxOther6, sel=DMuxOther13, a=ScreenAddress6);
+	DMux (in=DMuxOther7, sel=DMuxOther13, a=ScreenAddress7);
+	DMux (in=DMuxOther8, sel=DMuxOther13, a=ScreenAddress8);
+	DMux (in=DMuxOther9, sel=DMuxOther13, a=ScreenAddress9);
+
+	DMux (in=DMuxOther10, sel=DMuxOther13, a=ScreenAddress10);
+	DMux (in=DMuxOther11, sel=DMuxOther13, a=ScreenAddress11);
+	DMux (in=DMuxOther12, sel=DMuxOther13, a=ScreenAddress12);
+
+	//In for RAM and Screen
+	Not16 (in[0]=address[14], in[1]=address[14], in[2]=address[14], in[3]=address[14],
+		 in[4]=address[14], in[5]=address[14], in[6]=address[14], in[7]=address[14], 
+		in[8]=address[14], in[9]=address[14], in[10]=address[14], in[11]=address[14],
+		 in[12]=address[14], in[13]=address[14], in[14]=address[14], in[15]=address[14], out=SelectRAMin);
+	
+	Not16 (in[0]=address[13], in[1]=address[13], in[2]=address[13], in[3]=address[13],
+		 in[4]=address[13], in[5]=address[13], in[6]=address[13], in[7]=address[13], 
+		in[8]=address[13], in[9]=address[13], in[10]=address[13], in[11]=address[13],
+		 in[12]=address[13], in[13]=address[13], in[14]=address[13], in[15]=address[13], out=NotA13);
+	And16 (a[0]=address[14], a[1]=address[14], a[2]=address[14], a[3]=address[14],
+		 a[4]=address[14], a[5]=address[14], a[6]=address[14], a[7]=address[14],
+		a[8]=address[14], a[9]=address[14], a[10]=address[14], a[11]=address[14], 
+		a[12]=address[14], a[13]=address[14], a[14]=address[14], a[15]=address[14], b=NotA13, out=SelectScreenIn);
+
+
+	And16 (a=SelectRAMin, b=in, out=InRAM);
+	And16 (a=SelectScreenIn, b=in, out=InScreen);
+
+	//Add the address and load, in to RAM and Screen
+	//RAM
+	RAM16K (in=InRAM, load=RamLoad, address[0]=RAMaddress0, address[1]=RAMaddress1, address[2]=RAMaddress2, address[3]=RAMaddress3,
+		 address[4]=RAMaddress4, address[5]=RAMaddress5, address[6]=RAMaddress6, address[7]=RAMaddress7,
+		 address[8]=RAMaddress8, address[9]=RAMaddress9, address[10]=RAMaddress10, address[11]=RAMaddress11,
+		 address[12]=RAMaddress12, address[13]=RAMaddress13, out=OutRAM);
+
+	//Screen
+	Screen (in=InScreen, load=ScreenLoad, address[0]=ScreenAddress0, address[1]=ScreenAddress1, address[2]=ScreenAddress2, address[3]=ScreenAddress3,
+		 address[4]=ScreenAddress4, address[5]=ScreenAddress5, address[6]=ScreenAddress6, address[7]=ScreenAddress7,
+		 address[8]=ScreenAddress8, address[9]=ScreenAddress9, address[10]=ScreenAddress10, address[11]=ScreenAddress11,
+		 address[12]=ScreenAddress12, out=OutScreen);
+	
+	//Keyboard
+	Keyboard (out=OutKeyboard);
+
+	//Select out from Screen and RAM ,Keyboard
+	
+	Mux4Way16 (sel=address[13..14], a=OutRAM, b=OutRAM, c=OutScreen, d=OutKeyboard, out=out);
+
+//220305
+	                                                    
+}                                           
